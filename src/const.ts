@@ -1,0 +1,10 @@
+export const CONTAINER_CLASS = 'legato-container'
+export const VERTICAL_CONTAINER_CLASS = 'l-verticaL'
+export const HORIZONTAL_CONTAINER_CLASS = 'l-horizontal'
+export const DRAGGABLE_CLASS = 'l-draggable'
+export const PLACEHOLDER_CLASS = 'l-placeholder'
+export const HANDLER_CLASS = 'l-handler'
+export const DISABLED_CLASS = 'l-disabled'
+export const CONTEXT_CLASS = 'legato-drop-context'
+export const dropContext = Symbol('dropContext')
+// export const CREATED_EVENT_NAME = 'containerCreated'

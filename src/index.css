@@ -1,0 +1,36 @@
+.__container__ {
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    flex-wrap: nowrap;
+    /*display: flex;*/
+}
+
+.__container__.__vertical__ {
+
+}
+
+.__container__.__horizontal__ {
+    display: flex;
+    float: left;
+}
+.__container__.__horizontal__ > * {
+
+}
+
+
+.__container__ > * {
+    margin: 0;
+    /*overflow: hidden;*/
+    position: relative;
+
+}
+
+.__container__ .__drag-handler__ {
+    cursor: move;
+}
+
+
+
+
+

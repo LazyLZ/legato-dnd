@@ -1,0 +1,26 @@
+.__container__ {
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    flex-wrap: nowrap
+}
+.__container__ > * {
+    margin: 0;
+    /*overflow: hidden;*/
+    position: relative;
+    transform: none;
+}
+
+
+.__container__ .__drag-handler__ {
+    cursor: move;
+}
+
+
+.__container__ .__placeholder__ {
+    background: #ffb9b9;
+}
+
+
+
+
