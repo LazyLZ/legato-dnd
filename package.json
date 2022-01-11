@@ -1,7 +1,29 @@
 {
   "name": "legato-dnd",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
+  "author": "Lai Zhi",
+  "homepage": "https://github.com/LazyLZ/legato-dnd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LazyLZ/legato-dnd"
+  },
+  "keywords": [
+    "drag and drop",
+    "drag drop",
+    "drag list",
+    "draggable",
+    "drag&drop",
+    "drag",
+    "drop",
+    "dnd",
+    "legato-dnd"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "tsc": "tsc --emitDeclarationOnly --outDir dist",
