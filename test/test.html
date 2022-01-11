@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="../dist/index.min.js"></script>
+    <title>Vite App</title>
+</head>
+<body>
+<div id="app"></div>
+<script>
+    let items = [
+        {
+            name: 'AAAAAAAA', children: [
+                { name: 'Angela' },
+                { name: 'Bob' },
+                { name: 'Candy' },
+                { name: 'Duke' },
+                { name: 'Eve' },
+                { name: 'Far' }
+            ],
+            groups: [[0, 3], [2, 3]]
+        },
+        {
+            name: 'B', children: [
+                { name: 'Angela' },
+                { name: 'Bob' },
+                { name: 'Candy' }
+            ]
+        },
+        {
+            name: 'C', children: [
+                { name: 'Angela' },
+                { name: 'Bob' },
+                { name: 'Candy' }
+            ]
+        }
+    ]
+    const app = document.getElementById('app')
+    const div = document.createElement('div')
+    div.style.margin = 'auto'
+    div.style.maxWidth = '1000px'
+    div.style.overflow = 'auto'
+
+
+    function moveNode (div, order) {
+        const children = [...div.children]
+        const newChildren = order.map(i => children[i])
+        console.log('moveNode', children, newChildren)
+        children.forEach(c => c.remove())
+        div.append(...newChildren)
+    }
+
+
+    function createInner (items, groups) {
+        const div = document.createElement('div')
+        items.forEach(({ name }) => {
+            let draggable = document.createElement('div')
+            draggable = Legato.draggable(draggable, { handler: false })
+            draggable.style.display = 'flex'
+            const handler = document.createElement('div')
+            handler.innerText = 'InnerHandler'
+            draggable.append(
+                Legato.handler(handler),
+                document.createElement('input'),
+                name
+            )
+            div.appendChild(draggable)
+        })
+        const dragDrop = new Legato.DragDrop({
+            container: div,
+            vertical: true,
+            lockCrossAxis: true,
+            touchStartDelay: 200,
+            groups
+        })
+        dragDrop.on('orderChange', ({ order }) => {
+            moveNode(div, order)
+        })
+        return div
+    }
+
+    function createOuter (items) {
+        const div = document.createElement('div')
+        items.forEach(({ name, groups, children }) => {
+            let draggable = document.createElement('div')
+            draggable = Legato.draggable(draggable, { handler: false })
+            draggable.style.display = 'flex'
+            draggable.style.backgroundColor = '#f2f2f2'
+            const handler = document.createElement('div')
+            handler.innerText = 'Handler' + name
+            const inner = createInner(children || [], groups)
+            draggable.append(
+                Legato.handler(handler),
+                inner
+            )
+            div.appendChild(draggable)
+        })
+        const dragDrop = new Legato.DragDrop({
+            container: div,
+            lockCrossAxis: true
+        })
+        dragDrop.on('orderChange', ({ order }) => {
+            moveNode(div, order)
+        })
+        return div
+    }
+
+    div.append(createOuter(items))
+
+    app.append(div)
+</script>
+</body>
+</html>

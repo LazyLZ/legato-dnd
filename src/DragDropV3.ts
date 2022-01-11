@@ -1,5 +1,3 @@
-// import throttle from 'lodash/throttle'
-// import debounce from 'lodash/debounce'
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>

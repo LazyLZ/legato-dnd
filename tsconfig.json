@@ -10,8 +10,7 @@
     "strictNullChecks": true,
     "noImplicitThis": false,
     "types": [
-      "node",
-      "vite/client"
+      "node"
     ],
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -25,6 +24,7 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "outDir": "dist",
     "declaration": true,
     "declarationDir": "dist",
     "noUnusedLocals": false,
@@ -32,6 +32,8 @@
     "noImplicitReturns": true
   },
   "exclude": [
-    "test/**"
+    "test/**",
+    "dist/**",
+    "vite.config.ts"
   ]
 }
