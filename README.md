@@ -1,9 +1,8 @@
 # Legato Dnd
 Lite, fast and configurable drag & drop list.
 
-## Usage
 
-### Basic Usage
+## Basic Usage
 ```javascript
 const el = document.getElementById('container')
 for (let i=0;i<10;++i) {
@@ -14,7 +13,9 @@ for (let i=0;i<10;++i) {
 const container = new Legato.DragDrop({ container: el })
 
 ```
-### Options
+## Container Options
+props from Container, usage:
+
 ```typescript
 type ScrollDeltaFunctionType = ({state}: { state: ParentState }) => number
 type PlaceholderFunctionType = () => HTMLElement
@@ -40,3 +41,38 @@ interface DragDropProps {
     dropActiveClass?: string,
 }
 ```
+## Events
+basic usage:
+
+```typescript
+const dragDrop = new DragDrop(options)
+dragDrop.on('dragStart', () => {
+    console.log('dragStart')
+})
+dragDrop.on('orderChange', ({from, to, order}) => {
+    // do something
+})
+```
+### Move Position
+#### enterViewportEdge
+#### leaveViewportEdge
+#### enterContainerEdge
+#### leaveContainerEdge
+
+### Programming Scroll
+#### programmingScrollStart
+#### programmingScrollEnd
+#### programmingScrollError
+#### programmingScroll
+
+### Drag Lifecycle
+#### beforeDragStart
+#### dragStart
+#### dragOver
+#### dragCross
+#### beforeDrop
+#### drop
+#### dragEnd
+#### orderChange
+
+
