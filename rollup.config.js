@@ -22,7 +22,7 @@ module.exports = {
             // exclude: 'node_modules/**'
         }),
         resolve({ browser: true, extensions }),
-        commonjs({ extensions })
-        // uglify()
+        commonjs({ extensions }),
+        uglify()
     ]
 }

@@ -687,25 +687,25 @@ export class DragDrop extends Scroller {
     }
 
     constructor({
-                    container,
-                    // viewport,
-                    vertical = false,
-                    transitionDuration = 200,
-                    placeholder = DragDrop.defaultPlaceholder,
-                    scrollSpeed,
-                    scrollThreshold = 0,
-                    lockCrossAxis = false,
-                    lockArea = false,
-                    startDelay = 0,
-                    touchStartDelay = 0,
-                    startOffsetTolerate = 5,
-                    name = '',
-                    inactiveClass = '',
-                    startActiveClass = '',
-                    dragActiveClass = '',
-                    dropActiveClass = '',
-                    groups = [],
-                }: DragDropProps) {
+        container,
+        // viewport,
+        vertical = false,
+        transitionDuration = 200,
+        placeholder = DragDrop.defaultPlaceholder,
+        scrollSpeed,
+        scrollThreshold = 0,
+        lockCrossAxis = false,
+        lockArea = false,
+        startDelay = 0,
+        touchStartDelay = 200,
+        startOffsetTolerate = 5,
+        name = '',
+        inactiveClass = '',
+        startActiveClass = '',
+        dragActiveClass = '',
+        dropActiveClass = '',
+        groups = [],
+    }: DragDropProps) {
         super({scrollSpeed})
         if (!(container instanceof HTMLElement)) {
             throw TypeError('Container need to be HTMLElement')
@@ -1138,11 +1138,11 @@ export class DragDrop extends Scroller {
     }
 
     delayTouchDragStart({
-                            clientX,
-                            clientY,
-                            event,
-                            touchId,
-                        }: { clientX: number, clientY: number, event: TouchEvent, touchId: number }) {
+        clientX,
+        clientY,
+        event,
+        touchId,
+    }: { clientX: number, clientY: number, event: TouchEvent, touchId: number }) {
         const delayMs = this.touchStartDelay || this.startDelay
         let endX = clientX
         let endY = clientY
@@ -1644,10 +1644,10 @@ export class DragDrop extends Scroller {
     }
 
     updateDraggingModel({
-                            currentClientX = this.currentClientX,
-                            currentClientY = this.currentClientY,
-                            currentContainerRect = this.currentContainerRect,
-                        }) {
+        currentClientX = this.currentClientX,
+        currentClientY = this.currentClientY,
+        currentContainerRect = this.currentContainerRect,
+    }) {
         if (this.lockArea) {
             // console.log('calculate lockArea')
             const sRect = this.startRect
@@ -1769,10 +1769,10 @@ export class DragDrop extends Scroller {
     }
 
     updateDropModel({
-                        endClientX = this.endClientX,
-                        endClientY = this.endClientY,
-                        endContainerRect = this.endContainerRect,
-                    }) {
+        endClientX = this.endClientX,
+        endClientY = this.endClientY,
+        endContainerRect = this.endContainerRect,
+    }) {
         this.setEndState({
             endClientX,
             endClientY,
@@ -2042,7 +2042,7 @@ export class DragDrop extends Scroller {
                 from: this.startIndex,
                 to: this.currentIndex,
                 group: this.startGroup,
-                order
+                order,
             })
         }
 
