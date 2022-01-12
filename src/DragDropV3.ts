@@ -367,7 +367,7 @@ export class Scroller extends EventEmitter {
         const newShouldScroll = newState.shouldScroll
         // console.log('updateState', newState)
         if (!oldIsNearEdge && newIsNearEdge) {
-            const payload: LeaveViewportEdgeEvent = {
+            const payload: EnterViewportEdgeEvent = {
                 state: newState,
             }
             this.emit('enterViewportEdge', payload)
