@@ -282,12 +282,12 @@ export class ParentState {
 
         const itemDirection = this.itemIntersectState.direction
         const {dPositive, dNegative, threshold} = this.containerIntersectState
-        const padding = 32
+        // const padding = 32
         if (itemDirection === 1) {
-            return dPositive >= (threshold + padding)
+            return dPositive >= (threshold)
         }
         if (itemDirection === -1) {
-            return dNegative <= -(threshold + padding)
+            return dNegative <= -(threshold)
         }
         return (dNegative <= threshold && dPositive >= -threshold)
     }
