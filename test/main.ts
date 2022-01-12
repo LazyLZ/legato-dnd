@@ -1,4 +1,4 @@
-import {DragDrop, MoveGroup, draggable, handler} from '../index'
+import {DragDrop, MoveGroup, draggable, handler, OrderChangeEvent} from '../index'
 console.log('dragdrop', DragDrop)
 
 interface ItemType {
@@ -97,7 +97,7 @@ function createOuter (items: ItemType[]) {
         container: div,
         lockCrossAxis: true
     })
-    dragDrop.on('orderChange', ({ order }) => {
+    dragDrop.on('orderChange', ({ order }: OrderChangeEvent) => {
         moveNode(div, order)
     })
     return div

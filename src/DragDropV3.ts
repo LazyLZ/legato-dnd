@@ -366,12 +366,17 @@ export class Scroller extends EventEmitter {
         const oldShouldScroll = oldState.shouldScroll
         const newShouldScroll = newState.shouldScroll
         // console.log('updateState', newState)
-
         if (!oldIsNearEdge && newIsNearEdge) {
-            this.emit('enterViewportEdge', newState)
+            const payload: LeaveViewportEdgeEvent = {
+                state: newState,
+            }
+            this.emit('enterViewportEdge', payload)
         }
         if (oldIsNearEdge && !newIsNearEdge) {
-            this.emit('leaveViewportEdge', newState)
+            const payload: LeaveViewportEdgeEvent = {
+                state: newState,
+            }
+            this.emit('leaveViewportEdge', payload)
         }
 
         // TODO 需要更多滚动状态指示事件
@@ -411,12 +416,13 @@ export class Scroller extends EventEmitter {
 
         if (period) {
             period.stopFlag = true
-            this.emit('programmingScrollEnd', {
+            const payload: ProgrammingScrollEndEvent = {
                 startTime: period.startTime,
                 endTime: Date.now(),
                 endState: state, // Fixme 有可能是个全空的，此时要用上次的state
                 startState: period.state,
-            })
+            }
+            this.emit('programmingScrollEnd', payload)
             this.scrollPeriods = this.scrollPeriods.filter(p => p !== period)
         }
     }
@@ -432,10 +438,11 @@ export class Scroller extends EventEmitter {
             state: startState,
         } as Period
         this.scrollPeriods.push(period)
-        this.emit('programmingScrollStart', {
+        const payload: ProgrammingScrollStartEvent = {
             startTime,
             state: startState,
-        })
+        }
+        this.emit('programmingScrollStart', payload)
         const scroll = () => {
             const state = this.currentParentState
             if (period.stopFlag) return false
@@ -449,11 +456,12 @@ export class Scroller extends EventEmitter {
             if (isNaN(scrollDelta) || typeof scrollDelta !== 'number') {
                 // console.log('scrollError', this.periods.find(p => p === period))
                 // Fixme 容错机制，停止机制
-                this.emit('programmingScrollError', {
+                const payload: ProgrammingScrollErrorEvent = {
                     startTime,
                     state,
                     scrollDelta,
-                })
+                }
+                this.emit('programmingScrollError', payload)
                 this.stopScroll(state)
                 return false
             }
@@ -466,10 +474,13 @@ export class Scroller extends EventEmitter {
             } else {
                 target.scrollTo({top: newScrollOffset})
             }
-            this.emit('programmingScroll', {
+            const payload: ProgrammingScrollEvent = {
                 startTime,
                 state,
-            })
+                scrollDelta,
+                offset: newScrollOffset,
+            }
+            this.emit('programmingScroll', payload)
             return true
         }
 
@@ -486,12 +497,13 @@ export class Scroller extends EventEmitter {
         // console.log('clear', this.periods)
         this.scrollPeriods.forEach(p => {
             p.stopFlag = true
-            this.emit('programmingScrollEnd', {
+            const payload: ProgrammingScrollEndEvent = {
                 startTime: p.startTime,
                 endTime: Date.now(),
                 endState: new ParentState({}),
                 startState: p.state,
-            })
+            }
+            this.emit('programmingScrollEnd', payload)
         })
         this.scrollPeriods = []
         this.currentParentState = new ParentState({})
@@ -572,7 +584,114 @@ function moveList<T>(list: T[], fromStart: number, fromEnd: number, to: number) 
     return list
 }
 
+export type ContainerEventName =
+    'enterViewportEdge' |
+    'leaveViewportEdge' |
+    'enterContainerEdge' |
+    'leaveContainerEdge' |
 
+    'programmingScrollStart' |
+    'programmingScrollEnd' |
+    'programmingScrollError' |
+    'programmingScroll' |
+
+    'beforeDragStart' |
+    'dragStart' |
+    'dragOver' |
+    'dragCross' |
+    'beforeDrop' |
+    'drop' |
+    'dragEnd' |
+    'orderChange' |
+    string |
+    symbol
+
+// position event
+export interface EnterViewportEdgeEvent {
+    state: ParentState
+}
+
+export interface LeaveViewportEdgeEvent {
+    state: ParentState
+}
+
+export interface EnterContainerEdgeEvent {
+    intersectState: IntersectState
+}
+
+export interface LeaveContainerEdgeEvent {
+    intersectState: IntersectState
+}
+
+// scroll
+export interface ProgrammingScrollStartEvent {
+    startTime: number,
+    state: ParentState
+}
+
+export interface ProgrammingScrollEndEvent {
+    startTime: number,
+    endTime: number,
+    endState: ParentState,
+    startState: ParentState
+}
+
+export interface ProgrammingScrollErrorEvent {
+    startTime: number,
+    state: ParentState,
+    scrollDelta: number
+}
+
+export interface ProgrammingScrollEvent {
+    startTime: number,
+    state: ParentState,
+    scrollDelta: number,
+    offset: number
+}
+
+
+// lifestyle
+export interface BeforeDragStartEvent {
+    index: number,
+    cancel: () => void
+}
+
+export interface DragStartEvent {
+    index: number,
+}
+
+export interface DragOverEvent {
+    index: number
+}
+
+export interface DragCrossEvent {
+    order: number[],
+    from: number,
+    group: MoveGroup,
+    current: number,
+    oldCurrent: number,
+}
+
+export interface BeforeDropEvent {
+    index: number
+}
+
+export interface DropEvent {
+    index: number
+}
+
+export interface DragEndEvent {
+    index: number
+}
+
+export interface OrderChangeEvent {
+    order: number[],
+    from: number,
+    group: MoveGroup,
+    to: number,
+}
+
+// export type ContainerEventHandler = (event: ContainerEvent) => void
 export type PlaceholderFunctionType = () => HTMLElement
 export type MoveGroup = [number, number]
 
@@ -600,6 +719,7 @@ export interface DragDropProps {
 // Fixme state的整数化？小数会影响运算
 // Fixme program scroll在到顶时小范围震动，大概率是小数取整导致的
 // Fixme 可能存在listener泄露的问题（有listener未正确remove）
+
 export class DragDrop extends Scroller {
     static INACTIVE = 0
     static DRAG_START_ACTIVE = 1
@@ -1665,10 +1785,12 @@ export class DragDrop extends Scroller {
             const oldState = this.containerIntersectState
             // console.log('checkarea', this.startGroup, state.isIntersecting, currentContainerRect, currentItemRect)
             if (!oldState.isIntersecting && state.isIntersecting) {
-                this.emit('enterContainerEdge', {intersectState: state})
+                const payload: EnterContainerEdgeEvent = {intersectState: state}
+                this.emit('enterContainerEdge', payload)
             }
             if (oldState.isIntersecting && !state.isIntersecting) {
-                this.emit('leaveContainerEdge', {intersectState: state})
+                const payload: LeaveContainerEdgeEvent = {intersectState: state}
+                this.emit('leaveContainerEdge', payload)
             }
             this.containerIntersectState = state
         }
@@ -1682,12 +1804,15 @@ export class DragDrop extends Scroller {
         if (isIndexChange) {
             this.updateOtherItemPosition()
             this.updatePlaceholderPosition()
-            this.emit('dragCross', {
+            const order = moveList(this.innerOrder, this.startGroup[0], this.startGroup[1], this.currentIndex)
+            const payload: DragCrossEvent = {
                 from: this.startIndex,
+                group: this.startGroup,
                 current: this.currentIndex,
                 oldCurrent: oldCurrentIndex,
-                order: moveList(this.innerOrder, this.startGroup[0], this.startGroup[1], this.currentIndex),
-            })
+                order,
+            }
+            this.emit('dragCross', payload)
         }
     }
 
@@ -1899,12 +2024,13 @@ export class DragDrop extends Scroller {
             if (!this.isElementDraggable(this.startElement)) {
                 this._dragCancelFlag = true
             }
-            this.emit('beforeDragStart', {
+            const payload: BeforeDragStartEvent = {
                 index: this.startIndex,
                 cancel: () => {
                     this._dragCancelFlag = true
                 },
-            })
+            }
+            this.emit('beforeDragStart', payload)
         } catch (e) {
             this._dragCancelFlag = true
         }
@@ -1954,10 +2080,10 @@ export class DragDrop extends Scroller {
                 el.classList.remove(...this.startActiveClassList)
                 el.classList.add(...this.dragActiveClassList)
             })
-
-        this.emit('dragStart', {
+        const payload: DragStartEvent = {
             index: this.startIndex,
-        })
+        }
+        this.emit('dragStart', payload)
         // console.log('onDragStart', this.startIndex)
         // console.log('scrollinit', this.startContainerRect, this.scrollableParentsRect)
     }
@@ -1976,7 +2102,8 @@ export class DragDrop extends Scroller {
             currentContainerRect,
         })
         this.updateParentState(this.getParentState())
-        this.emit('dragOver', {index: this.currentIndex})
+        const payload: DragOverEvent = {index: this.currentIndex}
+        this.emit('dragOver', payload)
         // console.log('onDragOver')
     }
 
@@ -1997,7 +2124,8 @@ export class DragDrop extends Scroller {
             // startClientX,
             // startClientY
         })
-        this.emit('beforeDrop', {index: this.endIndex})
+        const payload: BeforeDropEvent = {index: this.endIndex}
+        this.emit('beforeDrop', payload)
     }
 
     // Fixme 判断移动到minimizeParentRect外，则判定拖拽重置
@@ -2013,9 +2141,10 @@ export class DragDrop extends Scroller {
                 el.classList.add(...this.dropActiveClassList)
             })
         // console.log('emit drop')
-        this.emit('drop', {
+        const payload: DropEvent = {
             index: this.endIndex,
-        })
+        }
+        this.emit('drop', payload)
     }
 
     dragEnd(e: any) {
@@ -2025,6 +2154,9 @@ export class DragDrop extends Scroller {
             this.updateInnerOrder()
         }
         const order = [...this.innerOrder]
+        const payload: DragEndEvent = {
+            index: this.endIndex,
+        }
         this.children
             .filter(this.isElementDraggable)
             .forEach(el => {
@@ -2034,14 +2166,16 @@ export class DragDrop extends Scroller {
         this.clearPlaceholder()
         this.clearDragStyle()
         this.clearDragState()
-        this.emit('dragEnd')
+
+        this.emit('dragEnd', payload)
         if (this.startIndex !== this.currentIndex) {
-            this.emit('orderChange', {
+            const payload: OrderChangeEvent = {
                 from: this.startIndex,
                 to: this.currentIndex,
                 group: this.startGroup,
                 order,
-            })
+            }
+            this.emit('orderChange', payload)
         }
 
         // console.log('dragEnd', this.innerOrder)
