@@ -1,3 +1,5 @@
+// TODO 生命周期控制必须优化，在意外的多次或者未触发生命周期事件时，要能够恢复状态。
+
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>
@@ -708,6 +710,11 @@ export interface OrderChangeEvent {
 // export type ContainerEventHandler = (event: ContainerEvent) => void
 export type PlaceholderFunctionType = () => HTMLElement
 export type MoveGroup = [number, number]
+export interface DragEventProps {
+    _isHandled?: boolean
+}
+export type ExtendMouseEvent = MouseEvent & DragEventProps
+export type ExtendTouchEvent = TouchEvent & DragEventProps
 
 export interface DragDropProps {
     container: HTMLElement,
@@ -1057,13 +1064,16 @@ export class DragDrop extends Scroller {
     // TODO 代码整理优化
     // Fixme 考虑如何禁止某些element的拖拽
     bindMouseDragStartListeners() {
-        const mousedown = (e: MouseEvent) => {
+        const mousedown = (e: ExtendMouseEvent) => {
+            if (e._isHandled) return
             if (+e.button !== 0) return
+
             // console.log('mousedown event', this._status, this.isDragStarted, this.isDragStartActive)
             if (this.isDragStarted || this.isDragStartActive) return
             if (!this.isEventTargetDraggable(e)) return
             e.preventDefault()
-            e.stopPropagation()
+            e._isHandled = true
+            // e.stopPropagation()
             const payload = {
                 clientX: e.clientX,
                 clientY: e.clientY,
@@ -1223,24 +1233,36 @@ export class DragDrop extends Scroller {
         window.addEventListener('mousemove', dragOver, {passive: true})
 
         // drop
+        // 拖拽成功时禁止触发点击
+        const onClick = (e: MouseEvent) => {
+            // console.log('window click')
+            e.preventDefault()
+            e.stopPropagation()
+        }
+        window.addEventListener('click', onClick, {once: true, capture: true})
         window.addEventListener('mouseup', e => {
-            // e.preventDefault()
-            // e.stopPropagation()
+            e.preventDefault()
+            e.stopPropagation()
             window.removeEventListener('mousemove', dragOver)
             this.beforeDrop({clientX: e.clientX, clientY: e.clientY})
             this.drop({clientX: e.clientX, clientY: e.clientY})
-        }, {once: true})
+            setTimeout(() => {
+                window.removeEventListener('click', onClick)
+            }, 0)
+        }, {once: true, capture: true})
     }
 
     bindTouchDragStartListeners() {
-        this.container.addEventListener('touchstart', e => {
+        this.container.addEventListener('touchstart', (e: ExtendTouchEvent) => {
             // console.log('touchstart event', e, index)
+            if (e._isHandled) return
             if (this.isDragStarted || this.isDragStartActive) return
             if (!this.isEventTargetDraggable(e)) return
             if (e.cancelable) {
                 e.preventDefault()
             }
-            e.stopPropagation()
+            e._isHandled = true
+            // e.stopPropagation()
             const rect = this.container.getBoundingClientRect()
             const touch = [...e.touches].find(t => {
                 const {clientX: x, clientY: y} = t

@@ -47,7 +47,15 @@ function moveNode (div: HTMLElement, order: number[]) {
     children.forEach(c => c.remove())
     div.append(...newChildren)
 }
-
+window.addEventListener('click', (e) => {
+    console.log('click window',e)
+})
+window.addEventListener('mousedown', (e) => {
+    console.log('mousedown window',e)
+})
+window.addEventListener('mouseup', (e) => {
+    console.log('mouseup window',e)
+})
 
 function createInner (items:ItemType[], groups?: MoveGroup[]) {
     const div = document.createElement('div')
@@ -62,6 +70,15 @@ function createInner (items:ItemType[], groups?: MoveGroup[]) {
             document.createElement('input'),
             name
         )
+        el.addEventListener('click', () => {
+            console.log('click inner', name)
+        })
+        el.addEventListener('mousedown', () => {
+            console.log('mousedown inner', name)
+        })
+        el.addEventListener('mouseup', () => {
+            console.log('mouseup inner', name)
+        })
         div.appendChild(el)
     })
     const dragDrop = new DragDrop({
@@ -91,6 +108,15 @@ function createOuter (items: ItemType[]) {
             handler(handlerEl),
             inner
         )
+        el.addEventListener('click', () => {
+            console.log('click outer', name)
+        })
+        el.addEventListener('mousedown', () => {
+            console.log('mousedown outer', name)
+        })
+        el.addEventListener('mouseup', () => {
+            console.log('mouseup outer', name)
+        })
         div.appendChild(el)
     })
     const dragDrop = new DragDrop({
