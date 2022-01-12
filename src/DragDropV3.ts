@@ -1553,8 +1553,8 @@ export class DragDrop extends Scroller {
             throw Error(`[LegatoDnD] start position out of boundary: (${this.startClientX}, ${this.startClientY})`)
         }
         const g = this.groups.find(g => g[0] === this.startIndex)
-        if (g && g[0] >= 0 && g[1] <= this.orderedRects.length) {
-            this.startGroup = g
+        if (g && g[0] >= 0 && g[1] < this.orderedRects.length) {
+            this.startGroup = [...g]
         } else {
             this.startGroup = [this.startIndex, this.startIndex]
         }
