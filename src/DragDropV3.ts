@@ -1,3 +1,5 @@
+// Fixme 判断是否编程滚动，不能看item边缘，要看cursor位置
+
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>
@@ -12,7 +14,6 @@ import {
     HORIZONTAL_CONTAINER_CLASS,
     // DRAG_HANDLER_CLASS
 } from './const'
-
 
 export function draggable(el: HTMLElement, options?: { handler: boolean }): HTMLElement {
     const {handler = true} = options || {}
@@ -245,6 +246,7 @@ export class ScrollState {
 }
 
 export interface ParentStatePropTypes {
+    displacement?: number,
     itemIntersectState?: IntersectState
     containerIntersectState?: IntersectState,
     scrollState?: ScrollState
@@ -252,11 +254,12 @@ export interface ParentStatePropTypes {
 
 // Fixme 当前状态的滚动+scrollDelta后，可能超过应该滚动的距离
 export class ParentState {
+    displacement = NaN
     itemIntersectState = new IntersectState({})
     containerIntersectState = new IntersectState({})
     scrollState = new ScrollState({})
 
-    constructor({itemIntersectState, containerIntersectState, scrollState}: ParentStatePropTypes) {
+    constructor({displacement, itemIntersectState, containerIntersectState, scrollState}: ParentStatePropTypes) {
         if (itemIntersectState) {
             this.itemIntersectState = itemIntersectState
         }
@@ -266,6 +269,16 @@ export class ParentState {
         if (scrollState) {
             this.scrollState = scrollState
         }
+        if (typeof displacement === 'number') {
+            this.displacement = displacement
+        }
+    }
+
+    get isMoveToEdge() {
+        const t = 3
+        const direction = this.itemIntersectState.direction
+        return (direction === 1 && this.displacement > t) ||
+            direction === -1 && this.displacement < -t
     }
 
     get isNearEdge() { // 物品是否接近边界
@@ -309,7 +322,7 @@ export class ParentState {
     }
 
     get shouldScroll() {
-        return this.isNearEdge && this.isScrollable && !(this.isFullVisible && this.hasItemMoveSpace)
+        return this.isNearEdge && this.isMoveToEdge && this.isScrollable && !(this.isFullVisible && this.hasItemMoveSpace)
     }
 }
 
@@ -330,8 +343,11 @@ export class Scroller extends EventEmitter {
 
     static defaultScrollDeltaFunction({state}: { state: ParentState }) {
         const alpha = 3
-        const {value, direction} = state.itemIntersectState
-        const edge = value * direction
+        const {value: intersectSize, direction} = state.itemIntersectState
+        // TODO 这里应该计算走折线(要排除小距离抖动的情况)时最后一个顶点到当前的距离，而不是总距离，否则鼠标离边缘太近则不触发滚动
+        const displacement = state.displacement
+        const edge = Math.max(-displacement * direction, intersectSize * direction)
+        // console.log('edge', edge)
         const [a1, b1, a2, b2] = [-20, 1, -100, 10]
         const k = (b1 - b2) / (a1 - a2)
         const b = b1 - k * a1
@@ -1697,6 +1713,12 @@ export class DragDrop extends Scroller {
         }
 
         return new ParentState({
+            displacement: this.displacement(
+                this.currentClientX,
+                this.currentClientY,
+                this.startClientX,
+                this.startClientY,
+            ),
             itemIntersectState: iiState,
             containerIntersectState,
             scrollState,

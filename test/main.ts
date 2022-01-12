@@ -1,5 +1,5 @@
 import {DragDrop, MoveGroup, draggable, handler, OrderChangeEvent} from '../index'
-console.log('dragdrop', DragDrop)
+// console.log('dragdrop', DragDrop)
 
 interface ItemType {
     name: string,
