@@ -158,7 +158,8 @@ export interface ProgrammingScrollEvent {
 ```typescript
 // lifestyle
 export interface BeforeDragStartEvent {
-    index: number,
+    startIndex: number,
+    startGroup: MoveGroup,
     cancel: () => void
 }
 ```
@@ -167,7 +168,8 @@ export interface BeforeDragStartEvent {
 
 ```typescript
 export interface DragStartEvent {
-    index: number,
+    startIndex: number,
+    startGroup: MoveGroup,
 }
 
 ```
@@ -176,7 +178,10 @@ export interface DragStartEvent {
 
 ```typescript
 export interface DragOverEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    currentIndex: number,
+    currentGroup: MoveGroup
 }
 
 
@@ -187,10 +192,11 @@ export interface DragOverEvent {
 ```typescript
 export interface DragCrossEvent {
     order: number[],
-    from: number,
-    group: MoveGroup,
-    current: number,
-    oldCurrent: number,
+    startIndex: number,
+    startGroup: MoveGroup,
+    currentIndex: number,
+    currentGroup: MoveGroup
+    lastCurrentIndex: number,
 }
 
 
@@ -200,9 +206,11 @@ export interface DragCrossEvent {
 
 ```typescript
 export interface BeforeDropEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
-
 
 ```
 
@@ -210,7 +218,10 @@ export interface BeforeDropEvent {
 
 ```typescript
 export interface DropEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
 
 
@@ -220,7 +231,11 @@ export interface DropEvent {
 
 ```typescript
 export interface DragEndEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup,
+    order: number[]
 }
 
 
@@ -231,9 +246,10 @@ export interface DragEndEvent {
 ```typescript
 export interface OrderChangeEvent {
     order: number[],
-    from: number,
-    group: MoveGroup,
-    to: number,
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
 ```
 
