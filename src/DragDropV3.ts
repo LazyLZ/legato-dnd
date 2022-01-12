@@ -1,5 +1,3 @@
-// Fixme 判断是否编程滚动，不能看item边缘，要看cursor位置
-
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>
