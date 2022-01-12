@@ -381,7 +381,7 @@ export class Scroller extends EventEmitter {
         const oldIsNearEdge = oldState.isNearEdge
         const oldShouldScroll = oldState.shouldScroll
         const newShouldScroll = newState.shouldScroll
-        // console.log('updateState', newState)
+        console.log('updateState', newState)
         if (!oldIsNearEdge && newIsNearEdge) {
             const payload: EnterViewportEdgeEvent = {
                 state: newState,
@@ -668,51 +668,70 @@ export interface ProgrammingScrollEvent {
 
 // lifestyle
 export interface BeforeDragStartEvent {
-    index: number,
+    startIndex: number,
+    startGroup: MoveGroup,
     cancel: () => void
 }
 
 export interface DragStartEvent {
-    index: number,
+    startIndex: number,
+    startGroup: MoveGroup,
 }
 
 export interface DragOverEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    currentIndex: number,
+    currentGroup: MoveGroup
 }
 
 export interface DragCrossEvent {
     order: number[],
-    from: number,
-    group: MoveGroup,
-    current: number,
-    oldCurrent: number,
+    startIndex: number,
+    startGroup: MoveGroup,
+    currentIndex: number,
+    currentGroup: MoveGroup
+    lastCurrentIndex: number,
 }
 
 export interface BeforeDropEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
 
 export interface DropEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
 
 export interface DragEndEvent {
-    index: number
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup,
+    order: number[]
 }
 
 export interface OrderChangeEvent {
     order: number[],
-    from: number,
-    group: MoveGroup,
-    to: number,
+    startIndex: number,
+    startGroup: MoveGroup,
+    endIndex: number,
+    endGroup: MoveGroup
 }
 
 // export type ContainerEventHandler = (event: ContainerEvent) => void
 export type PlaceholderFunctionType = () => HTMLElement
 export type MoveGroup = [number, number]
+
 export interface DragEventProps {
     _isHandled?: boolean
 }
+
 export type ExtendMouseEvent = MouseEvent & DragEventProps
 export type ExtendTouchEvent = TouchEvent & DragEventProps
 
@@ -1847,11 +1866,13 @@ export class DragDrop extends Scroller {
             this.updateOtherItemPosition()
             this.updatePlaceholderPosition()
             const order = moveList(this.innerOrder, this.startGroup[0], this.startGroup[1], this.currentIndex)
+            const {startIndex, startGroup, currentIndex, currentGroup} = this
             const payload: DragCrossEvent = {
-                from: this.startIndex,
-                group: this.startGroup,
-                current: this.currentIndex,
-                oldCurrent: oldCurrentIndex,
+                startIndex,
+                currentIndex,
+                startGroup: [...startGroup],
+                currentGroup: [...currentGroup],
+                lastCurrentIndex: oldCurrentIndex,
                 order,
             }
             this.emit('dragCross', payload)
@@ -2066,8 +2087,10 @@ export class DragDrop extends Scroller {
             if (!this.isElementDraggable(this.startElement)) {
                 this._dragCancelFlag = true
             }
+            const {startIndex, startGroup} = this
             const payload: BeforeDragStartEvent = {
-                index: this.startIndex,
+                startIndex,
+                startGroup: [...startGroup],
                 cancel: () => {
                     this._dragCancelFlag = true
                 },
@@ -2122,8 +2145,10 @@ export class DragDrop extends Scroller {
                 el.classList.remove(...this.startActiveClassList)
                 el.classList.add(...this.dragActiveClassList)
             })
+
         const payload: DragStartEvent = {
-            index: this.startIndex,
+            startIndex: this.startIndex,
+            startGroup: [...this.startGroup],
         }
         this.emit('dragStart', payload)
         // console.log('onDragStart', this.startIndex)
@@ -2144,7 +2169,13 @@ export class DragDrop extends Scroller {
             currentContainerRect,
         })
         this.updateParentState(this.getParentState())
-        const payload: DragOverEvent = {index: this.currentIndex}
+        const {startIndex, currentIndex, startGroup, currentGroup} = this
+        const payload: DragOverEvent = {
+            startIndex,
+            currentIndex,
+            startGroup: [...startGroup],
+            currentGroup: [...currentGroup]
+        }
         this.emit('dragOver', payload)
         // console.log('onDragOver')
     }
@@ -2166,7 +2197,13 @@ export class DragDrop extends Scroller {
             // startClientX,
             // startClientY
         })
-        const payload: BeforeDropEvent = {index: this.endIndex}
+        const {startIndex, endIndex, startGroup, endGroup} = this
+        const payload: BeforeDropEvent = {
+            startIndex,
+            endIndex,
+            startGroup: [...startGroup],
+            endGroup: [...endGroup]
+        }
         this.emit('beforeDrop', payload)
     }
 
@@ -2183,8 +2220,12 @@ export class DragDrop extends Scroller {
                 el.classList.add(...this.dropActiveClassList)
             })
         // console.log('emit drop')
+        const {startIndex, endIndex, startGroup, endGroup} = this
         const payload: DropEvent = {
-            index: this.endIndex,
+            startIndex,
+            endIndex,
+            startGroup: [...startGroup],
+            endGroup: [...endGroup]
         }
         this.emit('drop', payload)
     }
@@ -2196,8 +2237,13 @@ export class DragDrop extends Scroller {
             this.updateInnerOrder()
         }
         const order = [...this.innerOrder]
+        const {startIndex, endIndex, startGroup, endGroup} = this
         const payload: DragEndEvent = {
-            index: this.endIndex,
+            startIndex,
+            endIndex,
+            startGroup: [...startGroup],
+            endGroup: [...endGroup],
+            order
         }
         this.children
             .filter(this.isElementDraggable)
@@ -2212,10 +2258,11 @@ export class DragDrop extends Scroller {
         this.emit('dragEnd', payload)
         if (this.startIndex !== this.currentIndex) {
             const payload: OrderChangeEvent = {
-                from: this.startIndex,
-                to: this.currentIndex,
-                group: this.startGroup,
-                order,
+                startIndex,
+                endIndex,
+                startGroup: [...startGroup],
+                endGroup: [...endGroup],
+                order
             }
             this.emit('orderChange', payload)
         }
