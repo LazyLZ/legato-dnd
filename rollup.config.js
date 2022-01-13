@@ -14,7 +14,8 @@ function createBase () {
         plugins: [
             typescript({
                 tsconfig: 'tsconfig.json',
-                sourceMap: false
+                sourceMap: false,
+                target: 'es6'
             }),
             nodeResolve({ extensions }),
             commonjs({ extensions })
