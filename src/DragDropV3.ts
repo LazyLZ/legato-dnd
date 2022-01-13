@@ -1,5 +1,5 @@
 // TODO 生命周期控制必须优化，在意外的多次或者未触发生命周期事件时，要能够恢复状态。
-
+// TODO 事件的preventDefault要仔细考虑，不能阻止用户复制
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>
