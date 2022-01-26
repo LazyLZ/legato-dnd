@@ -2174,7 +2174,7 @@ export class DragDrop extends Scroller {
             startIndex,
             currentIndex,
             startGroup: [...startGroup],
-            currentGroup: [...currentGroup]
+            currentGroup: [...currentGroup],
         }
         this.emit('dragOver', payload)
         // console.log('onDragOver')
@@ -2202,7 +2202,7 @@ export class DragDrop extends Scroller {
             startIndex,
             endIndex,
             startGroup: [...startGroup],
-            endGroup: [...endGroup]
+            endGroup: [...endGroup],
         }
         this.emit('beforeDrop', payload)
     }
@@ -2225,7 +2225,7 @@ export class DragDrop extends Scroller {
             startIndex,
             endIndex,
             startGroup: [...startGroup],
-            endGroup: [...endGroup]
+            endGroup: [...endGroup],
         }
         this.emit('drop', payload)
     }
@@ -2235,19 +2235,19 @@ export class DragDrop extends Scroller {
         this.updateStatus(DragDrop.INACTIVE)
         // console.log('onDragend', this.startIndex, this.currentIndex, this.endIndex)
 
-        const order = [...this.innerOrder]
+
         const {startIndex, endIndex, startGroup, endGroup} = this
+        if (startIndex !== endIndex) {
+            this.updateInnerOrder()
+        }
+        const order = [...this.innerOrder]
         const payload: DragEndEvent = {
             startIndex,
             endIndex,
             startGroup: [...startGroup],
             endGroup: [...endGroup],
-            order
+            order,
         }
-        if (startIndex !== endIndex) {
-            this.updateInnerOrder()
-        }
-
         this.children
             .filter(this.isElementDraggable)
             .forEach(el => {
@@ -2265,7 +2265,7 @@ export class DragDrop extends Scroller {
                 endIndex,
                 startGroup: [...startGroup],
                 endGroup: [...endGroup],
-                order
+                order,
             }
             this.emit('orderChange', payload)
         }
