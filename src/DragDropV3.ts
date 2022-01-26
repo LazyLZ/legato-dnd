@@ -2233,9 +2233,8 @@ export class DragDrop extends Scroller {
     dragEnd(e: any) {
         // console.log('onDragEnd')
         this.updateStatus(DragDrop.INACTIVE)
-        if (this.startIndex !== this.currentIndex) {
-            this.updateInnerOrder()
-        }
+        // console.log('onDragend', this.startIndex, this.currentIndex, this.endIndex)
+
         const order = [...this.innerOrder]
         const {startIndex, endIndex, startGroup, endGroup} = this
         const payload: DragEndEvent = {
@@ -2245,6 +2244,10 @@ export class DragDrop extends Scroller {
             endGroup: [...endGroup],
             order
         }
+        if (startIndex !== endIndex) {
+            this.updateInnerOrder()
+        }
+
         this.children
             .filter(this.isElementDraggable)
             .forEach(el => {
@@ -2256,7 +2259,7 @@ export class DragDrop extends Scroller {
         this.clearDragState()
 
         this.emit('dragEnd', payload)
-        if (this.startIndex !== this.currentIndex) {
+        if (startIndex !== endIndex) {
             const payload: OrderChangeEvent = {
                 startIndex,
                 endIndex,

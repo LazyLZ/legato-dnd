@@ -4,7 +4,7 @@ Lite, fast, Beautiful and configurable drag & drop list.
 
 Use with frameworks:
 - for Vue 2.x: [vue2-legato-dnd](https://github.com/LazyLZ/vue2-legato-dnd)
-- for Vue 2.x: [vue-legato-dnd](https://github.com/LazyLZ/vue-legato-dnd)
+- for Vue 3.x: [vue-legato-dnd](https://github.com/LazyLZ/vue-legato-dnd)
 - for React: [react-legato-dnd](https://github.com/LazyLZ/react-legato-dnd)
 
 ## Install
