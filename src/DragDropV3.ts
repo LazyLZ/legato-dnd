@@ -1,5 +1,8 @@
 // TODO 生命周期控制必须优化，在意外的多次或者未触发生命周期事件时，要能够恢复状态。
 // TODO 事件的preventDefault要仔细考虑，不能阻止用户复制
+
+
+//Fixme touch和mouse有bug，某些情况下无法完全handle dropend的mouseup/touchend事件
 import EventEmitter from 'eventemitter3'
 
 type Timeout = ReturnType<typeof setTimeout>
@@ -614,6 +617,7 @@ export type ContainerEventName =
     'beforeDragStart' |
     'dragStart' |
     'dragOver' |
+    'dragCanceled' |
     'dragCross' |
     'beforeDrop' |
     'drop' |
@@ -671,6 +675,13 @@ export interface BeforeDragStartEvent {
     startIndex: number,
     startGroup: MoveGroup,
     cancel: () => void
+}
+
+export interface DragCanceledEvent {
+    clientX: number,
+    clientY: number,
+    event: MouseEvent,
+    type: number,
 }
 
 export interface DragStartEvent {
@@ -2063,6 +2074,7 @@ export class DragDrop extends Scroller {
     dragCanceled(e: any) {
         if (!this.isDragStartActive) return
         this.updateStatus(DragDrop.INACTIVE)
+        this.emit('dragCanceled', e)
         this._children = []
         this.innerOrder = []
         this.orderedRects = []
